@@ -88,14 +88,16 @@ for j = 1:Nfilt
     % do this for every template separately
     WA = reshape(rez.WA(:, j, :, :), [], Nbatches);
     WA = gpuArray(WA); % svd on the GPU was faster for this, but the Python randomized CPU version might be faster still
-    [A, B, C] = svdecon(WA);
+    %[A, B, C] = svdecon(WA);
+    [A, B, C] = svd(WA, 'econ');
     % W_a times W_b results in a reconstruction of the time components
     rez.W_a(:,:,j) = gather(A(:, 1:nKeep) * B(1:nKeep, 1:nKeep));
     rez.W_b(:,:,j) = gather(C(:, 1:nKeep));
     
     UA = reshape(rez.UA(:, j, :, :), [], Nbatches);
     UA = gpuArray(UA);
-    [A, B, C] = svdecon(UA);
+    [A, B, C] = svd(UA, 'econ');
+    %[A, B, C] = svdecon(UA);
     % U_a times U_b results in a reconstruction of the time components
     rez.U_a(:,:,j) = gather(A(:, 1:nKeep) * B(1:nKeep, 1:nKeep));
     rez.U_b(:,:,j) = gather(C(:, 1:nKeep));
